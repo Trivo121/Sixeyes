@@ -1,0 +1,9 @@
+librosa
+nltk
+pandas
+tqdm
+torch
+transformers
+datasets
+speechrecognition
+whisper
