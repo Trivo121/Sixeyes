@@ -1,85 +1,76 @@
-1. Spam Call Detection and Prevention
-Our primary implemented feature utilizing state-of-the-art speech and text analysis.
-Technical Implementation:
+## Sixeyes
+      Sixeyes is an AI model which is mainly focused to detect the spam calls and recognize fraud calls in realtime . ik there are many apps which could recognize  spamcalls but we are trying to make this one more accurate and could be viable in realtime. we want to build a system at which it should spam a calls through the previous history database and it should recognize the calls to be based on their behaviour and anomaly patterns. the goal and logic was defined clearly for us. but the whole project is at development phase we are still in the development phase at this level we could only load and preprocess the data, extract text from it, and reads the transcript and tells whether it's a spam/fraud call or not. we need to take it up a bit high to implemt this in real time. that is still in development
 
-Speech-to-text conversion using OpenAI's Whisper model
-Text analysis using DistilBERT for fraud pattern detection
-Real-time call screening and blocking capabilities
+## Features
 
-Key Achievements:
+### 1. Spam/Fraud Call Detection (In Development)
+- Real-time audio analysis
+- NLP-based classification using DistilBERT
+- Voice pattern recognition
 
-97% accuracy in spam call detection
-Real-time processing with <500ms latency
-Support for multiple languages
-Automated alert system for suspicious calls
+### 2. Deepfake Video Recognition (Completed) ✔️
+- VKYC (Video Know Your Customer) integration
+- Real-time frame analysis
+- Pre-trained classification models
 
-2. Financial Fraud Detection
-Our second implemented feature focusing on transaction security and pattern analysis.
-Technical Implementation:
+### 3. Feedback & Monitoring System (Pending)
+- User-reported spam numbers database
+- Community-driven fraud prevention
+- Continuous learning from user feedback
 
-Anomaly detection in transaction patterns
-Machine learning models for behavior analysis
-Real-time transaction monitoring system
+## Current Progress
 
-Key Metrics:
+### Completed Components
+- **Deepfake Detection System**
+  - Implemented frame-level analysis pipeline
+  - Integrated YOLOv3 for object consistency checks
+  - Developed OpenCV-based video processing workflow
 
-95% accuracy in fraud detection
-False positive rate < 2%
-Real-time transaction screening
-Pattern-based risk scoring system
+- **Spam Detection Foundation**
+  - Completed audio preprocessing pipeline
+  - Implemented Librosa-based feature extraction
+  - Set up DistilBERT text classification skeleton
+  - Created initial dataset structure
 
-🚧 Pending Features (In Development)
-1. Deepfake Detection in VKYC
-Video and audio authenticity verification
-Facial expression analysis
-Voice pattern authentication
-Status: In planning phase
+### Technical Achievements
+- Successful integration of Whisper Small for ASR
+- Optimized audio preprocessing with Librosa
+- Established baseline metrics for deepfake detection
 
-2. Post-Onboarding Transaction Monitoring
+## Pending Features
 
-Continuous account behavior monitoring
-Risk-based transaction analysis
-Automated flagging system
-Status: Design phase
+### Spam/Fraud Detection
+- [ ] DistilBERT model training/evaluation
+- [ ] Real-time audio stream integration
+- [ ] Voice signature analysis component
+- [ ] Multi-factor authentication logic
 
-3. Feedback and Reporting Mechanisms
+### Feedback System
+- [ ] User reporting API endpoints
+- [ ] Community trust scoring mechanism
+- [ ] Feedback-based model retraining pipeline
 
-User reporting interface
-Feedback collection system
-Model improvement pipeline
-Status: Requirements gathering
+### General
+- [ ] End-to-end encryption implementation
+- [ ] Performance optimization for edge devices
+- [ ] Cross-platform compatibility layer
 
-Technical Stack
-Implemented Technologies
+## Tech Stack
 
-AI/ML: OpenAI Whisper, DistilBERT
-Backend: Python, FastAPI
-Database: PostgreSQL
-Cloud Infrastructure: AWS
-Monitoring: ELK Stack
+### Core AI Components
+- **Spam Detection**
+  - Python, PyTorch
+  - Transformers (DistilBERT)
+  - Librosa, OpenAI Whisper
+  - NLTK, Pandas
 
-Project Status
+- **Deepfake Detection**
+  - OpenCV, YOLOv3
+  - Pretrained CNN models
+  - FFmpeg video processing
 
-Current Phase: 2/5 features completed
-Next Steps: Beginning development of Deepfake Detection
-Timeline: Remaining features scheduled for Q2-Q3 2025
+### Infrastructure
+- Hugging Face Datasets
+- Jupyter Notebooks
+- GitHub Actions (CI/CD)
 
-Getting Started
-bashCopy# Clone the repository
-git clone [repository-url]
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the application
-python main.py
-Contributors
-
-Team of 3 developers
-Currently focused on feature implementation and system optimization
-
-Future Roadmap
-
-Q2 2025: Deepfake Detection Implementation
-Q3 2025: Post-Onboarding Monitoring
-Q4 2025: Feedback System Integration
