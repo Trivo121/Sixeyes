@@ -33,7 +33,7 @@ os.makedirs(TRANSCRIPTS_PATH, exist_ok=True)
 
 # Text preprocessing tools
 stop_words = set(stopwords.words("english"))
-lemmatizer = WordNetLemmatizer()
+lemmatizer = WordNetLemmatizer() 
 
 # Initialize Whisper model
 whisper_model = whisper.load_model("base")  # Options: "tiny", "base", "small", "medium", "large"

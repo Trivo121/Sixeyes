@@ -30,8 +30,15 @@ def compute_metrics(eval_pred):
 
 def load_custom_dataset():
     # Load preprocessed CSV data
-    df = pd.read_csv(BASE_DIR / "data/metadata.csv")
+    df = pd.read_csv(BASE_DIR / "data/processed/cleaned_calls.csv")
+    
+    # Convert to Hugging Face dataset format
     dataset = Dataset.from_pandas(df)
+    
+    # Rename columns if necessary (adapt to your CSV structure)
+    dataset = dataset.rename_column("is_spam", "label")  # Change "is_spam" to your label column name
+    dataset = dataset.rename_column("transcript", "text")  # Change "transcript" to your text column name
+    
     return dataset.train_test_split(test_size=0.2)
 
 def train_model():
@@ -57,11 +64,11 @@ def train_model():
     # Tokenize dataset
     tokenized_dataset = dataset.map(tokenize_function, batched=True)
     
-    # Fixed TrainingArguments with matching strategies
+    # Training arguments
     training_args = TrainingArguments(
         output_dir=str(MODEL_PATH),
-        evaluation_strategy="epoch",    # Changed to match save strategy
-        save_strategy="epoch",          # Was already correct
+        evaluation_strategy="epoch",
+        save_strategy="epoch",
         learning_rate=TRAINING_CONFIG["learning_rate"],
         per_device_train_batch_size=TRAINING_CONFIG["batch_size"],
         per_device_eval_batch_size=TRAINING_CONFIG["batch_size"],
@@ -69,10 +76,7 @@ def train_model():
         weight_decay=0.01,
         load_best_model_at_end=True,
         metric_for_best_model="f1",
-        logging_dir=str(BASE_DIR / "logs"),
-        # Remove deprecated no_cuda and use proper device control
-        fp16=torch.cuda.is_available(),  # Enable mixed precision if available
-        report_to="none"                # Disable external reporting
+        logging_dir=str(BASE_DIR / "logs")
     )
     
     # Initialize Trainer
@@ -99,7 +103,4 @@ def train_model():
     print(f"F1 Score: {eval_metrics['eval_f1']:.4f}")
 
 if __name__ == "__main__":
-    import torch
-    if not torch.cuda.is_available():
-        print("Warning: No GPU detected, using CPU for training")
-    train_model()
+    train_model() 

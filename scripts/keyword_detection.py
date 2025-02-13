@@ -1,34 +1,94 @@
+import torch
+import re
 from transformers import pipeline
-import json
+from typing import List, Dict
+from utils.file_handler import load_model_and_tokenizer, load_detection_patterns
+from utils.config import REALTIME_CONFIG
 
-# Path to processed metadata file
-PROCESSED_DATA_PATH = "D:/Study/Projects/Six_eyes/Spam_call_detection/Data/processed"
-METADATA_FILE = "processed_metadata.json"
+class FraudKeywordDetector:
+    def __init__(self):
+        self.model, self.tokenizer = load_model_and_tokenizer()
+        self.patterns = load_detection_patterns()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
+        self.classifier = pipeline(
+            "text-classification",
+            model=self.model,
+            tokenizer=self.tokenizer,
+            device=0 if torch.cuda.is_available() else -1
+        )
 
-# Load the data
-with open(f"{PROCESSED_DATA_PATH}/{METADATA_FILE}", "r") as file:
-    data = json.load(file)
+    def _preprocess_batch(self, texts: List[str]) -> List[str]:
+        return [text.lower().strip() for text in texts]
 
+    def _detect_keywords(self, text: str) -> List[str]:
+        detected = []
+        
+        # Match exact keywords with word boundaries
+        for keyword in self.patterns["keywords"]:
+            if re.search(rf"\b{re.escape(keyword)}\b", text, re.IGNORECASE):
+                detected.append(keyword)
+        
+        # Match regex patterns
+        for pattern in self.patterns["regex_patterns"]:
+            if pattern.search(text):
+                detected.append(pattern.pattern)
+        
+        return list(set(detected))
 
-# Load the fine-tuned model
-MODEL_SAVE_PATH = "D:/Study/Projects/Six_eyes/Spam_call_detection/Models/nlp_model"
+    def _process_single(self, text: str) -> Dict:
+        try:
+            processed_text = self._preprocess_batch([text])[0]
+            prediction = self.classifier(
+                processed_text,
+                truncation=True,
+                max_length=512
+            )[0]
+            
+            keywords = self._detect_keywords(processed_text)
+            
+            return {
+                "text": text,
+                "is_fraud": prediction["label"] == "LABEL_1",
+                "confidence": prediction["score"],
+                "keywords": keywords,
+                "pattern_matches": len(keywords) > 0
+            }
+        except Exception as e:
+            return {
+                "text": text,
+                "error": str(e),
+                "is_fraud": False
+            }
 
-MODEL_PATH = MODEL_SAVE_PATH
-nlp_model = pipeline("text-classification", model=MODEL_PATH, tokenizer=MODEL_PATH)
+    def detect_batch(self, texts: List[str]) -> List[Dict]:
+        processed_texts = self._preprocess_batch(texts)
+        predictions = self.classifier(
+            processed_texts,
+            truncation=True,
+            padding=True,
+            max_length=512,
+            batch_size=REALTIME_CONFIG["max_batch_size"]
+        )
+        
+        results = []
+        for text, pred in zip(texts, predictions):
+            processed_text = self._preprocess_batch([text])[0]
+            keywords = self._detect_keywords(processed_text)
+            
+            results.append({
+                "text": text,
+                "is_fraud": pred["label"] == "LABEL_1",
+                "confidence": pred["score"],
+                "keywords": keywords,
+                "pattern_matches": len(keywords) > 0,
+                "decision": (
+                    "block" if pred["score"] > REALTIME_CONFIG["confidence_threshold"] 
+                    else "review"
+                )
+            })
+        
+        return results
 
-def detect_fraud_keywords(transcript):
-    """Detect fraudulent content in the transcript."""
-    prediction = nlp_model(transcript)
-    label = prediction[0]["label"]
-    confidence = prediction[0]["score"]
-
-    if label == "LABEL_1":  # LABEL_1 corresponds to "fraudulent"
-        print(f"Fraudulent content detected with confidence: {confidence:.2f}")
-        return True
-    return False
-
-# Example usage
-for entry in data:
-    transcript = entry["transcript"]
-    if detect_fraud_keywords(transcript):
-        print(f"Potential fraud detected in file: {entry['file_name']}")
+def get_detector() -> FraudKeywordDetector:
+    return FraudKeywordDetector()
