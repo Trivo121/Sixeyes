@@ -18,7 +18,7 @@ def compute_metrics(eval_pred):
     
     precision, recall, f1, _ = metric.compute(
         predictions=predictions,
-        references=labels,
+        references=labels, 
         average="weighted"
     )
     
